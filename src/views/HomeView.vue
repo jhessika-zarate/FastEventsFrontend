@@ -1,13 +1,13 @@
 <template>
-    
+    <body>
     <section 
       class="banner"
       :style="{ backgroundPositionY: parallaxOffset + 'px' }"
       ref="banner"
     >
       <div class="content">
-        <h1 class="title">CHUNO</h1>
-        <p class="subtitle">Conferencias que inspiran</p>
+        <h1 class="title">FastEvents</h1>
+        <p class="subtitle">Eventos Que Conectan</p>
         <button class="cta-button" @click="scrollToContent">Descubre próximos eventos</button>
       </div>
       <div class="image-grid">
@@ -48,6 +48,7 @@
       />
     </div>
   </div>
+  </body>
   </template>
   
   <script>
@@ -111,13 +112,14 @@
           '/images/conf2.jpg',
          
         ],
-        categories: [
-        { name: 'Tecnología', icon: 'fas fa-microchip', color: '#6C4675' },
-        { name: 'Ciencia', icon: 'fas fa-atom', color: '#3A8EBA' },
-        { name: 'Arte', icon: 'fas fa-paint-brush', color: '#B4869F' },
-        { name: 'Negocios', icon: 'fas fa-chart-pie', color: '#4CAF50' },
-        { name: 'Educación', icon: 'fas fa-book-open', color: '#6C4675' }
-      ]
+       categories: [
+  { name: 'Conciertos', icon: 'fas fa-music', color: '#4B0082' },        // Ícono de música + color violeta oscuro
+  { name: 'Teatro', icon: 'fas fa-theater-masks', color: '#1C3F60' },    // Ícono de teatro + azul profundo
+  { name: 'Arte', icon: 'fas fa-palette', color: '#5A2A83' },            // Ícono de paleta + púrpura oscuro
+  { name: 'Charla', icon: 'fas fa-microphone-alt', color: '#2C5F2D' },   // Ícono de micrófono + verde oscuro
+  { name: 'Festival', icon: 'fas fa-star', color: '#8B0000' }            // Ícono de estrella + rojo vino
+]
+
       }
     },
     components: {
@@ -157,6 +159,9 @@
   </script>
   
 <style scoped>
+body{
+  background-color: rgb(29, 27, 27);
+}
 .category-buttons {
   position: relative;
   
@@ -235,7 +240,7 @@
 }
 
 /* Colores dinámicos */
-.category-button:nth-child(1) { --color-rgb: 180, 134, 159 }
+.category-button:nth-child(1) { --color-rgb: 180, 134, 189 }
 .category-button:nth-child(2) { --color-rgb: 40, 88, 123}
 .category-button:nth-child(3) { --color-rgb: 132, 183, 194 }
 .category-button:nth-child(4) { --color-rgb: 37, 17, 1}
@@ -251,6 +256,7 @@
   animation: bounce 0.6s ease;
 }
 .banner {
+  padding-top: 2rem;
   height: 80vh;
   min-height: 600px;
   width:90%;
@@ -272,13 +278,16 @@
 
 .content {  
   text-align: left;
+  background-color: rgba(0, 0, 0, 0.529);
+  padding: 1.5rem;
+  border-radius: 10px;
   z-index: 2;
   max-width: 600px;
 }
 
 .title {
  
-  font-size: 8rem;
+  font-size: 7rem;
   margin: 0;
   background: #ffffff;
   -webkit-background-clip: text;

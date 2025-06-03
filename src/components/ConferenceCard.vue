@@ -2,7 +2,7 @@
     <section>
       <img  class="banner" src="https://picsum.photos/300/50"></img>
       
-    <router-link :to="`/conferencia/detalle/${conference.id}`" class="conference-card">
+    <router-link :to="`/conferencia/CompraEntrada/${conference.id}`" class="conference-card">
      
       <div class="card-header">
         

@@ -9,7 +9,7 @@
         <!-- Navegación principal -->
         <ul class="nav-links">
           <li><router-link to="/">Inicio</router-link></li>
-          <li><router-link to="/conferencias">Conferencias</router-link></li>
+          <li><router-link to="/conferencias">Eventos</router-link></li>
          
           <li><router-link to="/login">Login</router-link></li>
           
@@ -55,7 +55,7 @@
       <transition name="slide-down">
         <div v-if="showMobileMenu" class="mobile-menu">
           <router-link to="/">Inicio</router-link>
-          <router-link to="/conferencias">Conferencias</router-link>
+          <router-link to="/conferencias">Eventos</router-link>
           <router-link to="/agenda">Agenda</router-link>
           <router-link to="/contacto">Contacto</router-link>
         </div>
@@ -99,7 +99,7 @@
   
   <style scoped>
   .navbar {
-    background: #ffffff;
+    background: #e3e3e3;
     color: rgb(17, 16, 16);
     padding: 1rem 0;
     position: fixed;

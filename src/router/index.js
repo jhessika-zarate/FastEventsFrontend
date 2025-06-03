@@ -10,7 +10,7 @@ import HomeAsistenteView from '@/views/Asistente/HomeAsistenteView.vue'
 import ConferenciaAsistente from '@/views/Asistente/ConferenciaAsistente.vue'
 import ConferenciasPosibles from '@/views/Asistente/ConferenciasPosiblesAsistente.vue'
 
-
+import CompraEntrada from '@/views/CompraEntrada.vue'
 
 
 // Administrador
@@ -56,8 +56,15 @@ const router = createRouter({
       path: '/conferencias',
       name: 'Conferencias',
       component: Conferencias,},
+      {
+      path: '/CompraEntrada',
+      name: 'CompraEntrada',
+      component: CompraEntrada,},
+   
+    
    
     {
+      
       path: '/signup',
       name: 'signup',
       component: SignupView,
