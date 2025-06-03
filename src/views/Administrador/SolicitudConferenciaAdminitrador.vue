@@ -1,7 +1,7 @@
 <template>
   <header>
     <div class="overlay">
-      <h1>Bienvenido a CHUNO</h1>
+      <h1>Bienvenido a FastEvent</h1>
       <h3>Solicitud de charlas</h3>
       <br />
       <div></div>
