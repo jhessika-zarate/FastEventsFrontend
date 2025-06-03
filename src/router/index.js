@@ -22,7 +22,7 @@ import SolicitudConferenciaAdministrador from '@/views/Administrador/SolicitudCo
 // Conferencista
 import HomeConferencistaView from '@/views/Conferencista/HomeConferencistaView.vue'
 import ConferenciaConferencista from '@/views/Conferencista/ConferenciaConferencista.vue'
-import CategoriasTecnico from '@/views/Tecnico/CategoriasTecnico.vue'
+
 import DetalleEvento from '@/views/Conferencista/DetalleEvento.vue'
 
 const router = createRouter({
