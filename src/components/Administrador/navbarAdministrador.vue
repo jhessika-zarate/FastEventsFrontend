@@ -3,21 +3,21 @@
     <div class="container">
       <!-- Logo -->
       <router-link to="/admin/conferencias" class="logo">
-        <img src="/images/CHUNOAdmin.png" alt="Logo">
+        <img src="/images/FASTEVENTSAdmin.png" alt="Logo">
       </router-link>
 
       <!-- Navegación principal -->
       <ul class="nav-links">
         <li class="dropdown">
-          <a>Registros </a>
+          <a>Registrar </a>
           <div class="dropdown-content">
-            <router-link to="/admin/registro/conferencista">Conferencistas</router-link>
-            <router-link to="/admin/registro/asistente">Asistente</router-link>
+            <router-link to="/admin/registro/conferencista">Empresas</router-link>
+            <router-link to="/admin/registro/asistente">Asistentes</router-link>
           </div>
         </li>
-        <li><router-link to="/admin/conferencias">Conferencias</router-link></li>
-        <li><router-link to="/admin/solicitud/conferencista">Solicitud de conferencistas</router-link></li>
-        <li><router-link to="/admin/solicitud/charla">Solicitud de charlas</router-link></li>
+        <li><router-link to="/admin/conferencias">Eventos</router-link></li>
+        <li><router-link to="/admin/solicitud/conferencista">Solicitud de empresas</router-link></li>
+        <li><router-link to="/admin/solicitud/charla">Solicitud de eventos</router-link></li>
         <li><a @click="salir" class="logout">Salir</a></li>
       </ul>
 
@@ -33,11 +33,11 @@
           <div class="mobile-registros" @click="toggleRegistrosMobile">
             <span>Registros</span>
             <div v-if="showRegistrosMobile" class="mobile-registros-options">
-              <router-link to="/admin/registro/conferencista">Conferencistas</router-link>
-              <router-link to="/admin/registro/asistente">Asistente</router-link>
+              <router-link to="/admin/registro/conferencista">Empresas</router-link>
+              <router-link to="/admin/registro/asistente">Asistentes</router-link>
             </div>
           </div>
-          <router-link to="/admin/solicitud/conferencista">Solicitud de conferencistas</router-link>
+          <router-link to="/admin/solicitud/conferencista">Solicitud de empresas</router-link>
           <a @click="salir">Salir</a>
       </div>
     </transition>
@@ -93,6 +93,11 @@ import { useAuthStore } from "@/stores/AuthStore";
   </script>
   
   <style scoped>
+  img {
+    max-width: 100%;
+    height: auto;
+    scale: 1.6;
+  }
   .navbar {
     background: #ffffff;
     color: rgb(17, 16, 16);

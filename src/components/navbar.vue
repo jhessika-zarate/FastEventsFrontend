@@ -3,7 +3,7 @@
       <div class="container">
         <!-- Logo -->
         <router-link to="/" class="logo">
-          <img src="/images/CHUNO.png" alt="Logo">
+          <img src="/images/FASTEVENTS.png" alt="Logo">
         </router-link>
   
         <!-- Navegación principal -->
@@ -98,6 +98,11 @@
   </script>
   
   <style scoped>
+    img {
+    max-width: 100%;
+    height: auto;
+    scale: 1.4;
+  }
   .navbar {
     background: #ffffff;
     color: rgb(17, 16, 16);
