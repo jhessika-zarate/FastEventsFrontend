@@ -22,7 +22,8 @@ import SolicitudConferenciaAdministrador from '@/views/Administrador/SolicitudCo
 // Conferencista
 import HomeConferencistaView from '@/views/Conferencista/HomeConferencistaView.vue'
 import ConferenciaConferencista from '@/views/Conferencista/ConferenciaConferencista.vue'
-
+import CategoriasTecnico from '@/views/Tecnico/CategoriasTecnico.vue'
+import DetalleEvento from '@/views/Conferencista/DetalleEvento.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -148,6 +149,12 @@ const router = createRouter({
       component: ConferenciaConferencista,
       meta: { showConferencistaNav: true }, // Mostrar navbar de conferencista
     },
+    {
+      path: '/conferencista/detalle',
+      name: 'detalleEvento',
+      component: DetalleEvento,
+      meta: { showConferencistaNav: true }, // Mostrar navbar de conferencista
+    }
 
   ],
 })
