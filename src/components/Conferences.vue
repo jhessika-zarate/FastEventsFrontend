@@ -336,7 +336,7 @@ export default {
 .highlight {
   position: absolute;
   height: 100%;
-  background: #28587b;
+  background: #7b4828;
   border-radius: 2px;
 }
 
@@ -371,7 +371,7 @@ export default {
 }
 
 .conferences-container {
-  background-color: rgba(255, 255, 255, 0.525);
+  background-color: rgba(255, 255, 255, 0.866);
   display: flex;
   gap: 0.5rem;
   padding: 2rem;
@@ -385,7 +385,7 @@ export default {
 
 .filters-sidebar {
   flex: 0 0 300px;
-  background: #84b7c2;
+  background: #343c73ce;
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
