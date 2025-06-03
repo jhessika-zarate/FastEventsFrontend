@@ -3,7 +3,7 @@
       <div class="container">
         <!-- Logo -->
         <router-link to="/conferencista/home" class="logo">
-          <img src="/images/CHUNOConferencista.png" alt="Logo">
+          <img src="/images/FASTEVENTSEmpresa.png" alt="Logo">
         </router-link>
   
         <!-- Navegación principal -->
@@ -80,6 +80,11 @@ import { useAuthStore } from "@/stores/AuthStore";
   </script>
   
   <style scoped>
+    img {
+    max-width: 100%;
+    height: auto;
+    scale: 1.6;
+  }
   .navbar {
     background: #ffffff;
     color: rgb(17, 16, 16);

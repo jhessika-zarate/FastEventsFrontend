@@ -3,23 +3,22 @@
     <div class="container">
       <!-- Logo -->
       <router-link to="/admin/conferencias" class="logo">
-        <img src="/images/CHUNOAdmin.png" alt="Logo">
+        <img src="/images/FASTEVENTSAdmin.png" alt="Logo">
       </router-link>
 
       <!-- Navegación principal -->
       <ul class="nav-links">
         <li class="dropdown">
-          <a>Registros </a>
+          <a>Registrar </a>
           <div class="dropdown-content">
-            <router-link to="/admin/registro/conferencista">Conferencistas</router-link>
-            <router-link to="/admin/registro/asistente">Asistente</router-link>
-            <router-link to="/admin/registro/tecnico">Técnico</router-link>
+            <router-link to="/admin/registro/conferencista">Empresas</router-link>
+            <router-link to="/admin/registro/asistente">Asistentes</router-link>
           </div>
         </li>
-        <li><router-link to="/admin/conferencias">Conferencias</router-link></li>
-        <li><router-link to="/admin/solicitud/conferencista">Solicitud de conferencistas</router-link></li>
-        <li><router-link to="/admin/solicitud/charla">Solicitud de charlas</router-link></li>
-        <li><a @click="salir">Salir</a></li>
+        <li><router-link to="/admin/conferencias">Eventos</router-link></li>
+        <li><router-link to="/admin/solicitud/conferencista">Solicitud de empresas</router-link></li>
+        <li><router-link to="/admin/solicitud/charla">Solicitud de eventos</router-link></li>
+        <li><a @click="salir" class="logout">Salir</a></li>
       </ul>
 
       <!-- Menú móvil -->
@@ -34,12 +33,11 @@
           <div class="mobile-registros" @click="toggleRegistrosMobile">
             <span>Registros</span>
             <div v-if="showRegistrosMobile" class="mobile-registros-options">
-              <router-link to="/admin/registro/conferencista">Conferencistas</router-link>
-              <router-link to="/admin/registro/asistente">Asistente</router-link>
-              <router-link to="/admin/registro/tecnico">Técnico</router-link>
+              <router-link to="/admin/registro/conferencista">Empresas</router-link>
+              <router-link to="/admin/registro/asistente">Asistentes</router-link>
             </div>
           </div>
-          <router-link to="/admin/solicitud/conferencista">Solicitud de conferencistas</router-link>
+          <router-link to="/admin/solicitud/conferencista">Solicitud de empresas</router-link>
           <a @click="salir">Salir</a>
       </div>
     </transition>
@@ -95,6 +93,11 @@ import { useAuthStore } from "@/stores/AuthStore";
   </script>
   
   <style scoped>
+  img {
+    max-width: 100%;
+    height: auto;
+    scale: 1.6;
+  }
   .navbar {
     background: #ffffff;
     color: rgb(17, 16, 16);
@@ -146,6 +149,7 @@ import { useAuthStore } from "@/stores/AuthStore";
 .dropdown {
   position: relative;
   display: inline-block;
+  border-radius: 5px;
 }
 
 .dropdown-content {
@@ -157,10 +161,12 @@ import { useAuthStore } from "@/stores/AuthStore";
   z-index: 1;
   top: 100%;
   left: 0;
+  border-radius: 5px;
 }
 
 .dropdown:hover .dropdown-content {
   display: block;
+  border-radius: 5px;
 }
 
 .dropdown-content a {
@@ -172,6 +178,7 @@ import { useAuthStore } from "@/stores/AuthStore";
 
 .dropdown-content a:hover {
   background-color: #f1f1f1;
+  border-radius: 5px;
 }
 
 /* Estilos para mobile */
@@ -188,6 +195,22 @@ import { useAuthStore } from "@/stores/AuthStore";
   display: block;
   padding: 0.5rem 0;
 }
+
+  .logout {
+      padding: 5px 15px;
+      border-radius: 10px;
+      color: white !important;
+      cursor: pointer;
+      background-color: #052c80;
+    }
+
+    .logout:hover{
+      padding: 5px 15px;
+      border-radius: 10px;
+      color: white !important;
+      cursor: pointer;
+      background-color: #84b7c2;
+    }
 
   .search-box {
     display: flex;

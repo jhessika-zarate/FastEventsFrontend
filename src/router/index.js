@@ -17,18 +17,12 @@ import CompraEntrada from '@/views/CompraEntrada.vue'
 import RegistroConferencistaAdministrador from '@/views/Administrador/RegistroConferencistaAdministrador.vue'
 import SolicitudConferencistaAdministrador from '@/views/Administrador/SolicitudConferencistaAdministrador.vue'
 import RegistroAsistenteAdministrador from '@/views/Administrador/RegistroAsistenteAdministrador.vue'
-import RegistroTecnicoAdministrador from '@/views/Administrador/RegistroTecnicoAdministrador.vue'
 import ConferenciasAdministradorVue from '@/views/Administrador/ConferenciasAdministrador.vue'
 import SolicitudConferenciaAdministrador from '@/views/Administrador/SolicitudConferenciaAdminitrador.vue'
-// Tecnico
-import HomeTecnicoView from '@/views/Tecnico/HomeTecnicoView.vue'
-import RegistroAsistenteTecnicoView from '@/views/Tecnico/RegistroAsistenteTecnicoView.vue'
-import RegistroConferencistaTecnicoView from '@/views/Tecnico/RegistroConferencistaTecnicoView.vue'
-import RegistroTecnicoView from '@/views/Tecnico/RegistroTecnicosView.vue'
 // Conferencista
 import HomeConferencistaView from '@/views/Conferencista/HomeConferencistaView.vue'
 import ConferenciaConferencista from '@/views/Conferencista/ConferenciaConferencista.vue'
-import CategoriasTecnico from '@/views/Tecnico/CategoriasTecnico.vue'
+
 import DetalleEvento from '@/views/Conferencista/DetalleEvento.vue'
 
 const router = createRouter({
@@ -135,53 +129,10 @@ const router = createRouter({
       meta: { showAdminNav: true }, // Mostrar navbar de administrador
     },
     {
-      path: '/admin/registro/tecnico',
-      name: 'registroTecnicoAdministrador',
-      component: RegistroTecnicoAdministrador,
-      meta: { showAdminNav: true }, // Mostrar navbar de administrador
-    },
-    {
       path: '/admin/conferencias',
       name: 'ConferenciasAdministradorVue',
       component: ConferenciasAdministradorVue,
       meta: { showAdminNav: true }, // Mostrar navbar de administrador
-    },
-
-    // Tecnico
-
-    {
-      path: '/tecnico/home',
-      name: 'homeTecnico',
-      component: HomeTecnicoView,
-      meta: { showTecnicoNav: true }, // Mostrar navbar de tecnico
-
-    },
-    {
-      path: '/tecnico/registro/asistente',
-      name: 'registroAsistenteTecnico',
-      component: RegistroAsistenteTecnicoView,
-      meta: { showTecnicoNav: true }, // Mostrar navbar de tecnico
-    },
-    {
-      path: '/tecnico/registro/conferencista',
-      name: 'registroConferencistaTecnico',
-      component: RegistroConferencistaTecnicoView,
-      meta: { showTecnicoNav: true }, // Mostrar navbar de
-
-    },
-    {
-      path: '/tecnico/registro/tecnico',
-      name: 'registroTecnico',
-      component: RegistroTecnicoView,
-      meta: { showTecnicoNav: true }, // Mostrar navbar de
-
-    },
-    {
-      path: '/tecnico/categorias',
-      name: 'categoriasTecnico',
-      component: CategoriasTecnico,
-      meta: { showTecnicoNav: true }, // Mostrar navbar de
-
     },
 
     // Conferencista
