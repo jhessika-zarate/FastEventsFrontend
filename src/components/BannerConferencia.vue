@@ -1,5 +1,5 @@
 <template>
-    <div class="banner" :style="getPreviewStyle(themes[conference.estilo])">
+    <div class="banner" >
         <div class="banner-content">
             <h5>{{ conference.titulo }}</h5>
             <hr class="linea" />
@@ -26,8 +26,8 @@
         </div>
     </div>
     <ConferenceDetails v-if="showDetailsModal" @close="showDetailsModal = false" :Conference="conference" />
-    <EditConference v-if="showModal" @close="showModal = false" :conference="conference"
-        @refresh-conferences="$emit('refresh-conferences')" />
+    <ConferenceDetails v-if="showModal" @close="showModal = false" :conference="conference"
+        :editable="true" @refresh-conferences="$emit('refresh-conferences')" />
 </template>
 
 <script>
@@ -93,44 +93,7 @@ export default {
         }
     },
     methods: {
-        getPreviewStyle(theme) {
-            const styles = {
-                animation: theme.animation,
-                WebkitAnimation: theme.animation,
-                backgroundRepeat: theme.type === 'dots' || theme.type === 'stripes' ? 'repeat' : 'no-repeat'
-            };
-
-            switch (theme.type) {
-                case 'wave':
-                    styles.background = theme.color;
-                    styles.overflow = 'hidden';
-                    break;
-                case 'gradient':
-                    styles.background = `linear-gradient(${theme.angle}deg, ${theme.colors.join(', ')})`;
-                    styles.backgroundSize = '400% 400%';
-                    break;
-                case 'stripes':
-                    styles.backgroundImage = `repeating-linear-gradient(
-                        ${theme.angle}deg,
-                        ${theme.colors[0]},
-                        ${theme.colors[0]} ${theme.size},
-                        ${theme.colors[1]} ${theme.size},
-                        ${theme.colors[1]} calc(${theme.size} * 2)
-                    )`;
-                    styles.backgroundSize = '80px 80px';
-                    break;
-
-                case 'dots':
-                    styles.backgroundImage = `radial-gradient(
-                        circle at center,
-                        ${theme.color} ${theme.size},
-                        transparent calc(${theme.size} + 1px)
-                    )`;
-                    styles.backgroundSize = `${theme.spacing} ${theme.spacing}`;
-                    break;
-            }
-            return styles;
-        },
+    
         showAlert() {
             Swal.fire({
                 title: `Conferencia: ${this.conference.titulo}`,
