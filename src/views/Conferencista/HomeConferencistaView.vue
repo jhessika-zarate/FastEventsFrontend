@@ -1,30 +1,47 @@
 <template>
   <header>
     <div class="overlay">
-      <h1>Bienvenid@ rol de Conferencista</h1>
-      <h3>Aqui podras ver a los asistentes</h3>
-      <button class="botoncito" @click="showModal = true">Crear Conferencia</button>
-      <ConferenceModal v-if="showModal" @close="showModal = false" @submit="handleSubmit" />
+      <h1>Bienvenid@ rol como empresa</h1>
+      <h3>Aqui podras ver tus eventos</h3>
     </div>
   </header>
-  
-
+  <div style="width: 100% ;  display: flex; margin-top: 1rem;"> <button
+    class="botoncito"
+     @click="openCreateModal"
+  >
+    Crear Conferencia
+  </button></div>
 
   <div class="main-container_all">
     <div class="banner-container">
-      <BannerConferencia v-for="(conferencia, index) in Conferencias" :key="index" :conference="conferencia"
-        v-if="Conferencias.length > 0" @refresh-conferences="fetchConferencias()" />
+      <BannerConferencia
+        v-for="(conferencia, index) in Conferencias"
+        :key="index"
+        :conference="conferencia"
+        v-if="Conferencias.length > 0"
+        @refresh-conferences="fetchConferencias()"
+      />
     </div>
   </div>
+ <ConferenceDetails
+      v-if="showCreateModal"
+      @close="showCreateModal = false"
+      :conference="{}"
+      :editable="true"
+      :isNew="true"
+      @refresh-conferences="$emit('refresh-conferences')"
+    />
+
 </template>
 
 <script>
 import "sweetalert2/src/sweetalert2.scss";
-import ConferenceModal from '@/components/NuevaConferencia.vue';
+import ConferenceModal from "@/components/NuevaConferencia.vue";
 import BannerConferencia from "@/components/BannerConferencia.vue";
+import ConferenceDetails from "@/components/DetalleConferencia.vue";
 import { useConferenciaStore } from "@/stores/conferenciaStore";
 export default {
-  components: { ConferenceModal, BannerConferencia },
+  components: { ConferenceModal, BannerConferencia , ConferenceDetails },
   setup() {
     const conferenceStore = useConferenciaStore();
     return { conferenceStore };
@@ -32,15 +49,21 @@ export default {
   data() {
     return {
       showModal: false,
-      Conferencias: [],
-    }
+      Conferencias: [], eventoSeleccionado: null,
+      showCreateModal: false,
+      
+    };
   },
   async mounted() {
     this.fetchConferencias().then(() => {
       console.log("Conferencias cargadas", this.Conferencias);
     });
   },
-  methods: {
+ methods: {
+   openCreateModal() {
+      this.showCreateModal = true;
+    },
+  // ...otros métodos
     async fetchConferencias() {
       try {
         const response = await this.conferenceStore.fetchConferencias();
@@ -54,13 +77,65 @@ export default {
 
         const usuario = JSON.parse(usuarioData);
 
-        this.Conferencias = response.filter(conferencia => {
-          console.log(`Comparando conferencia ID: ${conferencia.idusuario} con usuario ID: ${usuario.idusuario}`);
+        this.Conferencias = response.filter((conferencia) => {
+          console.log(
+            `Comparando conferencia ID: ${conferencia.idusuario} con usuario ID: ${usuario.idusuario}`
+          );
           return conferencia.idusuario === usuario.idusuario;
         });
       } catch (error) {
         console.log("Error al obtener las conferencias: ", error);
       }
+    },
+   guardarEvento() {
+      try {
+        // Validar JSON
+        const categoriasParsed = JSON.parse(this.eventoForm.categorias || "{}");
+        const preciosParsed = this.eventoForm.precios
+          ? JSON.parse(this.eventoForm.precios)
+          : null;
+
+        // Crear o actualizar evento
+        if (this.eventoSeleccionado) {
+          // Editar: encontrar índice y actualizar
+          const index = this.Conferencias.findIndex(
+            (e) => e === this.eventoSeleccionado
+          );
+          if (index !== -1) {
+            this.Conferencias.splice(index, 1, {
+              ...this.eventoForm,
+              categorias: categoriasParsed,
+              precios: preciosParsed,
+            });
+          }
+        } else {
+          // Crear nuevo evento
+          this.Conferencias.push({
+            ...this.eventoForm,
+            categorias: categoriasParsed,
+            precios: preciosParsed,
+          });
+        }
+
+        this.cerrarModal();
+      } catch (e) {
+        alert("Error al guardar evento. Verifica que las categorías y precios sean JSON válidos.");
+        console.error(e);
+      }
+    },
+    cerrarModal() {
+      this.showModal = false;
+      this.eventoSeleccionado = null;
+      this.eventoForm = this.getEventoFormVacio();
+    },
+    editarEvento(evento) {
+      this.eventoSeleccionado = evento;
+      this.eventoForm = {
+        ...evento,
+        categorias: typeof evento.categorias === "object" ? JSON.stringify(evento.categorias) : evento.categorias,
+        precios: evento.precios ? (typeof evento.precios === "object" ? JSON.stringify(evento.precios) : evento.precios) : "",
+      };
+      this.showModal = true;
     },
   },
 };
@@ -131,9 +206,10 @@ header .overlay {
   width: 100%;
   height: 100%;
   padding: 50px;
+  margin-top: 3rem;
   color: #fff;
   text-shadow: 1px 1px 1px #333;
-  background-image: linear-gradient(135deg, #9c6b42a6 10%, #251101e6 100%);
+  background-image: linear-gradient(135deg, #426c9ca6 10%, #010c25e6 100%);
 }
 
 h1 {
@@ -156,11 +232,13 @@ p {
 }
 
 .botoncito {
-  background-color: #af9a88;
-  border-radius: 10%;
-  padding: 2rem;
+  background-color: #8894af;
+  width: 200px;
+  height: 50px;
+
+  padding: 1rem;
   font-size: 1rem;
-  width: fit-content;
+  
   height: auto;
   font-weight: 600;
   margin: 0 auto;
@@ -176,149 +254,5 @@ button {
   outline: none;
 }
 
-form {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  width: 50rem;
-  height: 36px;
-  padding: 35px;
-  margin: -83px auto 0 auto;
-  background-color: #6f5037;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px #A98467, 0 0 0 20px #ffffffeb;
-  transform: scale(0.6);
-  margin-top: -11rem;
-}
 
-input[type="text"] {
-  width: 100%;
-  height: 46px;
-  font-size: 60px;
-  line-height: 1;
-}
-
-input[type="text"]::placeholder {
-  color: #ffffff;
-}
-
-button {
-  position: relative;
-  display: block;
-  width: 84px;
-  height: 46px;
-  cursor: pointer;
-}
-
-#search-icon-circle {
-  position: relative;
-  top: -8px;
-  left: 0;
-  width: 33px;
-  height: 33px;
-  margin-top: 0;
-  border-width: 15px;
-  border: 15px solid #fff;
-  background-color: transparent;
-  border-radius: 50%;
-  transition: 0.5s ease all;
-}
-
-button span {
-  position: absolute;
-  top: 48px;
-  left: 38px;
-  display: block;
-  width: 30px;
-  height: 15px;
-  background-color: transparent;
-  border-radius: 10px;
-  transform: rotateZ(52deg);
-  transition: 0.5s ease all;
-}
-
-button span:before,
-button span:after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 35px;
-  height: 15px;
-  background-color: #fff;
-  border-radius: 10px;
-  transform: rotateZ(0);
-  transition: 0.5s ease all;
-}
-
-#search-icon:hover #search-icon-circle {
-  top: -1px;
-  width: 67px;
-  height: 15px;
-  border-width: 0;
-  background-color: #fff;
-  border-radius: 20px;
-}
-
-#search-icon:hover span {
-  top: 50%;
-  left: 56px;
-  width: 25px;
-  margin-top: -9px;
-  transform: rotateZ(0);
-}
-
-#search-icon:hover button span:before {
-  bottom: 11px;
-  transform: rotateZ(52deg);
-}
-
-#search-icon:hover button span:after {
-  bottom: -11px;
-  transform: rotateZ(-52deg);
-}
-
-#search-icon:hover button span:before,
-#search-icon:hover button span:after {
-  right: -6px;
-  width: 40px;
-  background-color: #fff;
-}
-
-.title-total {
-  padding: 2.5em 1.5em 1.5em 1.5em;
-}
-
-path {
-  fill: white;
-}
-
-.img-portada {
-  width: 100%;
-}
-
-.portada {
-  width: 6rem;
-  height: 100%;
-  border-top-left-radius: 20px;
-  border-bottom-left-radius: 20px;
-  background-image: url("/public/images/conf2.jpg");
-  background-position: bottom center;
-  background-size: cover;
-}
-
-.actions button {
-  border: none;
-  background: none;
-  font-size: 24px;
-  color: #af9a88;
-  cursor: pointer;
-  transition: 0.5s;
-
-  &:hover {
-    color: #251101;
-    transform: rotate(22deg);
-  }
-}
 </style>

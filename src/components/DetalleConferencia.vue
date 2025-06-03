@@ -1,458 +1,634 @@
 <template>
-    <div class="modal-overlay" @click.self="$emit('close')">
-        <div class="modal-content">
-            <!-- Banner -->
-            <div class="banner" :style="getPreviewStyle(themes[Conference.estilo])">
-                <div v-if="themes[Conference.estilo].type === 'wave'" class="wave-container">
-                    <svg class="wave" viewBox="0 0 1440 320">
-                        <path :d="themes[Conference.estilo].path" :fill="themes[Conference.estilo].color" />
-                    </svg>
-                </div>
-            </div>
+  <div class="modal-overlay" @click.self="$emit('close')">
+    <div class="modal-content" @click.stop>
+      <!-- Contenedor de detalles / edición -->
+      <div class="detalles">
+        <h2 class="title">
+          {{ editable ? "Editar Evento" : "Detalles del Evento" }}
+        </h2>
 
-            <!-- Contenedor de detalles -->
-            <div class="detalles">
-                <h2 class="title">Detalles de conferencia</h2>
-
-                <div class="detail-item">
-                    <label>Título</label>
-                    <p class="detail-content">{{ Conference.titulo }}</p>
-                </div>
-
-                <div class="detail-item">
-                    <label>Descripción</label>
-                    <p class="detail-content">{{ Conference.descripcion }}</p>
-                </div>
-
-                <div class="detail-item">
-                    <label>Fecha y Hora</label>
-                    <p class="detail-content">{{ Conference.fecha }}</p>
-                </div>
-
-                <div class="detail-item">
-                    <label>Modalidad</label>
-                    <p class="detail-content">{{ Conference.modalidad }}</p>
-                </div>
-                <div class="modal-actions">
-                    <button class="close-btn" type="button" @click="$emit('close')">Cerrar</button>
-                </div>
-            </div>
+        <div class="detail-item">
+          <label>Título</label>
+          <div v-if="editable">
+            <input
+              v-model="editableEvento.titulo"
+              type="text"
+              class="input-field"
+            />
+          </div>
+          <p v-else class="detail-content">{{ evento?.titulo }}</p>
         </div>
+
+        <div class="detail-item">
+          <label>Descripción</label>
+          <div v-if="editable">
+            <textarea
+              v-model="editableEvento.descripcion"
+              rows="3"
+              class="input-field"
+            ></textarea>
+          </div>
+          <p v-else class="detail-content">{{ evento?.descripcion }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Fecha</label>
+          <div v-if="editable">
+            <input
+              v-model="editableEvento.fecha"
+              type="date"
+              class="input-field"
+            />
+          </div>
+          <p v-else class="detail-content">{{ formattedDate }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Hora</label>
+          <div v-if="editable">
+            <input
+              v-model="editableEvento.hora"
+              type="time"
+              class="input-field"
+            />
+          </div>
+          <p v-else class="detail-content">{{ evento?.hora }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Día</label>
+          <div v-if="editable">
+            <input
+              v-model="editableEvento.dia"
+              type="text"
+              class="input-field"
+            />
+          </div>
+          <p v-else class="detail-content">{{ evento?.dia }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Link</label>
+          <div v-if="editable">
+            <input
+              v-model="editableEvento.link"
+              type="url"
+              class="input-field"
+            />
+          </div>
+          <a
+            v-else
+            class="detail-content"
+            :href="evento?.link"
+            target="_blank"
+            rel="noopener"
+            >{{ evento?.link }}</a
+          >
+        </div>
+
+        <div class="detail-item">
+          <label>Estado</label>
+          <div v-if="editable">
+            <select v-model="editableEvento.estado" class="input-field">
+              <option value="activo">Activo</option>
+              <option value="inactivo">Inactivo</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
+          <p v-else class="detail-content">{{ evento?.estado }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>ID Usuario</label>
+          <p class="detail-content">{{ evento?.idusuario }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Categorías</label>
+          <div v-if="editable">
+            <textarea
+              v-model="editableCategorias"
+              rows="3"
+              class="input-field"
+            ></textarea>
+            <small class="help-text">Separar categorías por coma</small>
+          </div>
+          <pre v-else class="detail-content">{{
+            JSON.stringify(evento?.categorias, null, 2)
+          }}</pre>
+        </div>
+
+        <div class="detail-item">
+          <label>Cantidad de Tickets</label>
+          <div v-if="editable">
+            <input
+              v-model.number="editableEvento.cantidadtickets"
+              type="number"
+              min="0"
+              class="input-field"
+            />
+          </div>
+          <p v-else class="detail-content">{{ evento?.cantidadtickets }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Ubicación</label>
+          <div v-if="editable">
+            <input
+              v-model="editableEvento.ubicacion"
+              type="text"
+              class="input-field"
+            />
+          </div>
+          <p v-else class="detail-content">{{ evento?.ubicacion }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Numeración de Asiento</label>
+          <div v-if="editable">
+            <input type="checkbox" v-model="editableEvento.numeracionasiento" />
+          </div>
+          <p v-else class="detail-content">
+            {{ evento?.numeracionasiento ? "Sí" : "No" }}
+          </p>
+        </div>
+
+        <div class="detail-item" v-if="evento?.precios || editable">
+          <label>Precios</label>
+          <div v-if="editable">
+            <textarea
+              v-model="editablePrecios"
+              rows="3"
+              class="input-field"
+            ></textarea>
+            <small class="help-text">Ingrese precios en formato JSON</small>
+          </div>
+          <pre v-else class="detail-content">{{
+            JSON.stringify(evento?.precios, null, 2)
+          }}</pre>
+          <div v-if="editable" class="price-form" >
+            <div style="display: flex;"> <div class="detail-item">
+              <label>Nombre del tipo</label>
+              <input
+                v-model="nuevoPrecio.nombre"
+                type="text"
+                class="input-field"
+              />
+            </div>
+            <div class="detail-item">
+              <label>Color</label>
+              <input
+                v-model="nuevoPrecio.color"
+                type="color"
+                class="input-field"
+              />
+            </div>
+            <div class="detail-item">
+              <label>Cantidad</label>
+              <input
+                v-model.number="nuevoPrecio.cantidad"
+                type="number"
+                class="input-field"
+              />
+            </div>
+            <div class="detail-item">
+              <label>Precio</label>
+              <input
+                v-model.number="nuevoPrecio.precio"
+                type="number"
+                step="0.01"
+                class="input-field"
+              />
+            </div></div>
+           
+            <button type="button" @click="agregarPrecio" class="save-btn mt-2">
+              Agregar Precio
+            </button>
+          </div>
+                  <!-- Mostrar tabla de precios solo cuando no está en modo edición -->
+<table v-if="!editable && evento?.precios" class="price-table">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Color</th>
+      <th>Cantidad</th>
+      <th>Precio</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr v-for="(info, nombre) in evento.precios" :key="nombre">
+      <td>{{ nombre }}</td>
+      <td>
+        <div
+          class="color-box"
+          :style="{ backgroundColor: info.color }"
+        ></div>
+        <span class="color-code">{{ info.color }}</span>
+      </td>
+      <td>{{ info.cantidad }}</td>
+      <td>{{ info.precio }}</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+
+
+
+        <div class="modal-actions">
+          <button v-if="editable" type="button" @click="save" class="save-btn">
+            Guardar
+          </button>
+          <button class="close-btn" type="button" @click="$emit('close')">
+            Cerrar
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script>
 export default {
-    props: {
-        Conference: {
-            type: Object,
-            required: true
-        }
+  props: {
+    evento: {
+      type: Object,
+      required: false,
+      default: null, // null si es creación
     },
-    data() {
-        return {
-            themes: [
-                {
-                    type: 'wave',
-                    color: '#8099ad',
-                    path: "M0,160L80,181.3C160,203,320,245,480,234.7C640,224,800,160,960,160C1120,160,1280,224,1360,256L1440,288L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z",
-                    animation: 'waveAnim 5s linear infinite'
-                },
-                {
-                    type: 'gradient',
-                    colors: ['#97BC62 ', '#FE90AF'],
-                    angle: 45,
-                    animation: 'gradientFlow 8s ease infinite'
-                },
-
-                {
-                    type: 'stripes',
-                    colors: ['#F0AB1E', '#F6DAA9'],
-                    angle: 45,
-                    size: '80px',
-                    animation: 'movingStripes 2s linear infinite'
-                },
-                {
-                    type: 'dots',
-                    color: '#563d69',
-                    background: '#2c3e50',
-                    size: '19px',
-                    spacing: '30px',  // Aumentar spacing para mejor efecto
-                    animation: 'floatingDots 10s linear infinite'  // Reducir velocidad
-                }
-            ]
-        }
+    editable: {
+      type: Boolean,
+      default: false,
     },
-    computed: {
-        formattedDate() {
-            if (!this.Conference.fecha) return 'Lunes 10 de Marzo';
-            const date = new Date(this.Conference.fecha + "T00:00:00");
-            return date.toLocaleDateString('es-ES', {
-                timeZone: "America/La_Paz",
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long'
-            });
-        }
+  },
+  data() {
+    return {
+      editableEvento: this.evento
+        ? { ...this.evento }
+        : {
+            // valores iniciales para crear un evento nuevo
+            titulo: "",
+            descripcion: "",
+            fecha: "",
+            hora: "",
+            dia: "",
+            link: "",
+            estado: "activo",
+            idusuario: "", // o algún valor por defecto
+            categorias: [],
+            cantidadtickets: 0,
+            ubicacion: "",
+            numeracionasiento: false,
+            precios: {},
+          },
+      editableCategorias: this.evento?.categorias?.join(", ") || "",
+      editablePrecios: this.evento
+        ? JSON.stringify(this.evento.precios || {}, null, 2)
+        : "{}",
+      nuevoPrecio: {
+        nombre: "",
+        color: "#ff5722",
+        cantidad: 0,
+        precio: 0,
+      },
+    };
+  },
+  computed: {
+    formattedDate() {
+      if (!this.evento?.fecha) return "";
+      const date = new Date(this.evento?.fecha + "T00:00:00");
+      return date.toLocaleDateString("es-ES", {
+        timeZone: "America/La_Paz",
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
     },
-    methods: {
-        getPreviewStyle(theme) {
-            const styles = {
-                animation: theme.animation,
-                WebkitAnimation: theme.animation,
-                backgroundRepeat: theme.type === 'dots' || theme.type === 'stripes' ? 'repeat' : 'no-repeat'
-            };
+    modalTitle() {
+      return this.evento
+        ? this.editable
+          ? "Editar Evento"
+          : "Detalles del Evento"
+        : "Crear Evento";
+    },
+  },
+  methods: {
+    save() {
+      // Procesar categorias
+      const categoriasArray = this.editableCategorias
+        .split(",")
+        .map((cat) => cat.trim())
+        .filter((cat) => cat.length > 0);
 
-            switch (theme.type) {
-                case 'wave':
-                    styles.background = theme.color;
-                    styles.overflow = 'hidden';
-                    break;
-                case 'gradient':
-                    styles.background = `linear-gradient(${theme.angle}deg, ${theme.colors.join(', ')})`;
-                    styles.backgroundSize = '400% 400%';
-                    break;
-                case 'stripes':
-                    styles.backgroundImage = `repeating-linear-gradient(
-                        ${theme.angle}deg,
-                        ${theme.colors[0]},
-                        ${theme.colors[0]} ${theme.size},
-                        ${theme.colors[1]} ${theme.size},
-                        ${theme.colors[1]} calc(${theme.size} * 2)
-                    )`;
-                    styles.backgroundSize = '80px 80px';
-                    break;
+      // Procesar precios
+      let preciosObj = {};
+      try {
+        preciosObj = JSON.parse(this.editablePrecios);
+      } catch (e) {
+        alert("Formato JSON inválido en Precios");
+        return;
+      }
 
-                case 'dots':
-                    styles.backgroundImage = `radial-gradient(
-                        circle at center,
-                        ${theme.color} ${theme.size},
-                        transparent calc(${theme.size} + 1px)
-                    )`;
-                    styles.backgroundSize = `${theme.spacing} ${theme.spacing}`;
-                    break;
-            }
-            return styles;
-        },
-    }
-}
+      // Emitir evento con datos
+      this.$emit("save", {
+        ...this.editableEvento,
+        categorias: categoriasArray,
+        precios: preciosObj,
+      });
+    },
+    agregarPrecio() {
+      const { nombre, color, cantidad, precio } = this.nuevoPrecio;
+
+      if (!nombre || cantidad <= 0 || precio <= 0) {
+        alert(
+          "Complete correctamente todos los campos para agregar un precio."
+        );
+        return;
+      }
+
+      // Agregar al objeto de precios con el nombre como clave
+      this.editableEvento.precios[nombre] = { color, cantidad, precio };
+
+      // Actualizar string editable para reflejar en textarea
+      this.editablePrecios = JSON.stringify(
+        this.editableEvento.precios,
+        null,
+        2
+      );
+
+      // Limpiar campos
+      this.nuevoPrecio = {
+        nombre: "",
+        color: "#ff5722",
+        cantidad: 0,
+        precio: 0,
+      };
+    },
+  },
+  watch: {
+    evento(newVal) {
+      if (newVal) {
+        this.editableEvento = { ...newVal };
+        this.editableCategorias = newVal?.categorias?.join(", ") || "";
+        this.editablePrecios = JSON.stringify(newVal.precios || {}, null, 2);
+      } else {
+        // Si no hay evento (creación), reiniciar
+        this.editableEvento = {
+          titulo: "",
+          descripcion: "",
+          fecha: "",
+          hora: "",
+          dia: "",
+          link: "",
+          estado: "activo",
+          idusuario: "",
+          categorias: [],
+          cantidadtickets: 0,
+          ubicacion: "",
+          numeracionasiento: false,
+          precios: {},
+        };
+        this.editableCategorias = "";
+        this.editablePrecios = "{}";
+      }
+    },
+  },
+};
 </script>
-
-<style>
-@keyframes gradientFlow {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-@keyframes shapeMorph {
-    0% {
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-    }
-
-    50% {
-        clip-path: polygon(20% 0, 80% 0, 90% 90%, 10% 90%);
-    }
-
-    100% {
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-    }
-}
-
-@keyframes movingStripes {
-    0% {
-        background-position: 0 0;
-    }
-
-    100% {
-        background-position: 80px 0;
-    }
-}
-
-@keyframes floatingDots {
-    0% {
-        background-position: 0 0;
-    }
-
-    100% {
-        background-position: 50px 50px;
-    }
-}
-
-
-
-@-webkit-keyframes gradientFlow {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-@-webkit-keyframes shapeMorph {
-    0% {
-        -webkit-clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-    }
-
-    50% {
-        -webkit-clip-path: polygon(20% 0, 80% 0, 90% 90%, 10% 90%);
-    }
-
-    100% {
-        -webkit-clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-    }
-}
-
-@-webkit-keyframes movingStripes {
-    0% {
-        background-position: 0 0;
-    }
-
-    100% {
-        background-position: 80px 0;
-    }
-}
-
-@-webkit-keyframes floatingDots {
-    0% {
-        background-position: 0 0;
-    }
-
-    100% {
-        background-position: 50px 50px;
-    }
-}
-</style>
 
 <style scoped>
 /* Fondo del modal */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10000;
-    animation: fadeIn 0.5s ease-in-out;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 @keyframes fadeIn {
-    0% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /* Contenedor del modal */
 .modal-content {
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: white;
-    border-radius: 15px;
-    width: 80%;
-    max-width: 800px;
-    max-height: 90vh;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0px 20px 50px rgba(0, 0, 0, 0.15);
-    transform: translateY(-100px);
-    animation: slideIn 0.8s ease-out forwards;
+  color: white;
+  border-radius: 15px;
+  width: 80%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0px 20px 50px rgba(0, 0, 0, 0.15);
+  transform: translateY(-100px);
+  animation: slideIn 0.8s ease-out forwards;
 }
 
 @keyframes slideIn {
-    0% {
-        transform: translateY(-100px);
-    }
-
-    100% {
-        transform: translateY(0);
-    }
-}
-
-/* Banner ocupa todo el ancho */
-.banner {
-    width: 100%;
-    height: 200px;
-    position: relative;
-    overflow: hidden;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    animation: backgroundPulse 5s ease-in-out infinite;
-}
-
-@keyframes backgroundPulse {
-    0% {
-        background-color: rgba(38, 198, 218, 0.8);
-    }
-
-    50% {
-        background-color: rgba(255, 87, 34, 0.8);
-    }
-
-    100% {
-        background-color: rgba(38, 198, 218, 0.8);
-    }
-}
-
-.wave {
-    animation: waveAnim 9s linear infinite;
-    -webkit-animation: waveAnim 9s linear infinite;
-}
-
-.wave-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 200%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 1;
-}
-
-@keyframes waveAnim {
-    0% {
-        transform: translateX(0%);
-    }
-
-    100% {
-        transform: translateX(-50%);
-    }
-}
-
-.wave {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
-    z-index: 1;
-    background-color: #1c588a;
-}
-
-.wave-back {
-    opacity: 0.6;
-    animation-duration: 16s !important;
-    bottom: 5px;
-    z-index: 1;
-    background-color: #43588c;
-}
-
-.wave {
-    animation: waveAnim 12s linear infinite;
-    -webkit-animation: waveAnim 12s linear infinite;
-    /* Prefijo para Safari */
+  0% {
+    transform: translateY(-100px);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }
 
 /* Estilo de los detalles */
 .detalles {
-    padding: 25px;
-    flex-grow: 1;
-    text-align: left;
-    font-family: 'Arial', sans-serif;
-    background-color: #ffffff;
-    border-radius: 15px;
-    margin-top: -10px;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  flex-grow: 1;
+  text-align: left;
+  font-family: "Arial", sans-serif;
+  background-color: #ffffff;
+  border-radius: 15px;
+  margin-top: 0px;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+  color: #2c3e50;
 }
 
 h2.title {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 25px;
-    text-align: center;
-    text-transform: uppercase;
-    animation: bounceTitle 1s ease infinite;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 25px;
+  text-align: center;
+  text-transform: uppercase;
 }
 
-@keyframes bounceTitle {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-/* Detalles individuales */
 .detail-item {
-    margin-bottom: 25px;
-    padding: 15px;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    animation: fadeInDetail 0.5s ease-out;
-}
-
-@keyframes fadeInDetail {
-    0% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
+  margin-bottom: 20px;
+  padding: 10px 15px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 label {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #34495e;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #34495e;
 }
 
 .detail-content {
-    font-size: 1.1rem;
-    color: #7f8c8d;
-    margin-top: 10px;
+  font-size: 1rem;
+  color: #555;
+  margin-top: 5px;
+  white-space: pre-wrap; /* Para mostrar JSON bien formateado */
 }
 
-/* Botón de cerrar */
+.modal-actions {
+  margin-top: 15px;
+}
+
 .close-btn {
-    background-color: #f44336;
-    color: white;
-    padding: 1.2rem;
-    font-size: 1.2rem;
-    border-radius: 10px;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 15px;
-    border: none;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+  background-color: #f44336;
+  color: white;
+  padding: 1rem;
+  font-size: 1.2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+  border: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .close-btn:hover {
-    background-color: #d32f2f;
-    transform: scale(1.05);
+  background-color: #d32f2f;
+  transform: scale(1.05);
 }
 
 .close-btn:active {
-    transform: scale(0.95);
+  transform: scale(0.95);
 }
+
+.save-btn {
+  background-color: #00be10;
+  color: white;
+  padding: 1rem;
+  font-size: 1.2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  width: 100%;
+  border: none;
+  margin-bottom: 1rem;
+}
+/* Estilos para inputs, textarea, select */
+.input-field {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-family: inherit;
+  color: #2c3e50;
+  background-color: #fff;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: #2575fc;
+  box-shadow: 0 0 5px rgba(37, 117, 252, 0.5);
+}
+
+/* Textarea con altura automática pero limitada */
+textarea.input-field {
+  resize: vertical;
+  min-height: 80px;
+  max-height: 200px;
+  font-family: inherit;
+}
+
+/* Select con mismo estilo */
+select.input-field {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2210%22%20height%3D%227%22%20viewBox%3D%220%200%2010%207%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M0%200l5%207%205-7z%22%20fill%3D%22%232575fc%22/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 10px 7px;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+/* Checkbox estilizado simple */
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+  position: relative;
+  background-color: white;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #2575fc;
+  border-color: #2575fc;
+}
+
+input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  width: 4px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Texto de ayuda pequeño */
+.help-text {
+  font-size: 0.85rem;
+  color: #999;
+  margin-top: 4px;
+  display: block;
+}
+
+
+/* Tabla de precios */
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+.price-table th,
+.price-table td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.color-box {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.color-code {
+  font-size: 0.85rem;
+  color: #555;
+}
+
 </style>
