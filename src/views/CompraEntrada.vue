@@ -2,132 +2,88 @@
   <div class="ticket-purchase">
     <h1>{{ evento.titulo }}</h1>
     <p class="event-info">
-      <span>{{ formatDate(evento.fecha) }}</span> • 
-      <span>{{ evento.hora }}</span> • 
+      <span>{{ formatDate(evento.fecha) }}</span> •
+      <span>{{ evento.hora }}</span> •
       <span>{{ evento.ubicacion }}</span>
     </p>
-    
+
     <div class="sectors-container">
       <!-- Imagen del evento -->
-      <div style="position: relative; width: 100%; height: 300px; padding-top: 125.0000%; padding-bottom: 0; box-shadow: 0 2px 8px 0 rgba(63,69,81,0.16); margin-top: 1.6em; margin-bottom: 0.9em; overflow: hidden; border-radius: 8px; will-change: transform;">
-        <iframe loading="lazy" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none; padding: 0;margin: 0;" 
-                :src="evento.link" allowfullscreen="allowfullscreen" allow="fullscreen">
+      <div
+        style="position: relative; width: 100%; height: 300px; padding-top: 125.0000%; padding-bottom: 0; box-shadow: 0 2px 8px 0 rgba(63,69,81,0.16); margin-top: 1.6em; margin-bottom: 0.9em; overflow: hidden; border-radius: 8px; will-change: transform;">
+        <iframe loading="lazy"
+          style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none; padding: 0;margin: 0;"
+          :src="evento.link" allowfullscreen="allowfullscreen" allow="fullscreen">
         </iframe>
       </div>
-      
+
       <h2>Selecciona tu sector</h2>
-      
+
       <div class="sectors-grid">
         <div v-for="(sector, name) in sectores" :key="name" class="sector-card"
-             :style="{ 'border-color': sector.color, 'background-color': `${sector.color}20` }"
-             @click="selectSector(name)"
-             :class="{ 'selected': selectedSector === name }">
+          :style="{ 'border-color': sector.color, 'background-color': `${sector.color}20` }" @click="selectSector(name)"
+          :class="{ 'selected': selectedSector === name }">
           <h3>{{ name.toUpperCase() }}</h3>
           <p>Precio: ${{ sector.precio }}</p>
           <p>Cantidad: {{ sector.cantidad }} asientos</p>
           <div class="color-sample" :style="{ 'background-color': sector.color }"></div>
         </div>
       </div>
-      
+
       <div v-if="selectedSector" class="quantity-selector">
         <label>Cantidad de tickets:</label>
-        <input 
-          type="number" 
-          v-model.number="ticketQuantity" 
-          min="1" 
-          :max="sectores[selectedSector].cantidad"
-        >
+        <input type="number" v-model.number="ticketQuantity" min="1" :max="sectores[selectedSector].cantidad">
         <p>Total: ${{ (sectores[selectedSector].precio * ticketQuantity).toFixed(2) }}</p>
       </div>
-      
-      <button 
-        @click="showPaymentForm = true" 
-        class="checkout-btn"
-        :disabled="!selectedSector || ticketQuantity < 1"
-      >
+
+      <button @click="showPaymentForm = true" class="checkout-btn" :disabled="!selectedSector || ticketQuantity < 1">
         Proceder al Pago
       </button>
     </div>
-    
+
     <!-- Formulario de Pago -->
     <div v-if="showPaymentForm" class="payment-modal">
       <div class="payment-container">
         <button class="close-btn" @click="showPaymentForm = false">×</button>
-        <h2>Información de Pago</h2>
-        
-        <form @submit.prevent="processPayment" class="payment-form">
-          <div class="form-group">
-            <label>Nombre en la Tarjeta</label>
-            <input type="text" v-model="paymentData.cardName" required placeholder="Como aparece en la tarjeta">
+        <h2 class="payment-title">🔒 Pago Seguro</h2>
+
+        <div class="form-group">
+          <label for="billing-name">Nombre del titular</label>
+          <input id="billing-name" v-model="billingName" type="text" placeholder="Juan Pérez" class="form-input"
+            required />
+        </div>
+
+        <div class="form-group">
+          <label for="billing-email">Email (opcional)</label>
+          <input id="billing-email" v-model="billingEmail" type="email" placeholder="juan@ejemplo.com"
+            class="form-input" />
+        </div>
+
+        <label for="card-number-element">Número de tarjeta</label>
+        <div id="card-number-element" class="stripe-element"></div>
+
+        <div class="row">
+          <div class="column">
+            <label for="card-expiry-element">MM / YY</label>
+            <div id="card-expiry-element" class="stripe-element"></div>
           </div>
-          
-          <div class="form-group">
-            <label>Número de Tarjeta</label>
-            <input 
-              type="text" 
-              v-model="paymentData.cardNumber" 
-              required 
-              placeholder="1234 5678 9012 3456"
-              @input="formatCardNumber"
-            >
-            <div class="card-icons">
-              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/visa/visa-original.svg" 
-                   :class="{ 'active': cardType === 'visa' }">
-              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mastercard/mastercard-original.svg" 
-                   :class="{ 'active': cardType === 'mastercard' }">
-              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/americanexpress/americanexpress-original.svg" 
-                   :class="{ 'active': cardType === 'amex' }">
-            </div>
+          <div class="column">
+            <label for="card-cvc-element">CVC</label>
+            <div id="card-cvc-element" class="stripe-element"></div>
           </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label>Fecha de Expiración</label>
-              <input 
-                type="text" 
-                v-model="paymentData.expiry" 
-                required 
-                placeholder="MM/AA"
-                @input="formatExpiry"
-              >
-            </div>
-            
-            <div class="form-group">
-              <label>CVV</label>
-              <input 
-                type="text" 
-                v-model="paymentData.cvv" 
-                required 
-                placeholder="123"
-                maxlength="4"
-              >
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>Correo Electrónico</label>
-            <input type="email" v-model="paymentData.email" required placeholder="Para enviar los tickets">
-          </div>
-          
-          <div class="summary">
-            <h3>Resumen de Compra</h3>
-            <p>Sector: {{ selectedSector.toUpperCase() }}</p>
-            <p>Cantidad: {{ ticketQuantity }}</p>
-            <p class="total">Total a Pagar: ${{ (sectores[selectedSector].precio * ticketQuantity).toFixed(2) }}</p>
-          </div>
-          
-          <button type="submit" class="pay-btn" :disabled="processingPayment">
-            {{ processingPayment ? 'Procesando...' : 'Pagar Ahora' }}
-          </button>
-        </form>
+        </div>
+
+        <button @click="handlePay" :disabled="processingPayment" class="pay-button">
+          {{ processingPayment ? 'Procesando...' : '💳 Pagar Ahora' }}
+        </button>
       </div>
     </div>
-    
+
     <!-- Ticket Preview -->
     <div v-if="generatedTicket" class="ticket-preview">
       <h2>Tu Ticket</h2>
       <button @click="downloadTicket" class="download-btn">Descargar Ticket</button>
-      
+
       <div class="ticket-container" ref="ticketContainer">
         <main class="ticket">
           <section class="ticket-sub">
@@ -173,13 +129,27 @@
 </template>
 
 <script>
+import { onMounted, ref, watch } from 'vue'
 import html2canvas from 'html2canvas';
 import html2pdf from 'html2pdf.js';
+import { loadStripe } from '@stripe/stripe-js'
+import Swal from 'sweetalert2';
+
+const stripePromise = loadStripe('pk_test_51RVixgFdzS9BTYBIRu2ywCDJIbG07BZMla226F7d3eV73ObFNBjTLemnPEV91Ed6JsbQ48FovcV4R5s0zciVgGXr00KGbVmZlj')
 
 export default {
   name: 'TicketPurchaseBySector',
   data() {
     return {
+      stripe: null,
+      elements: null,
+      cardNumber: null,
+      cardExpiry: null,
+      cardCvc: null,
+      processingPayment: false,
+      showPaymentForm: false,
+      billingName: '',
+      billingEmail: '',
       evento: {
         idevento: 1,
         titulo: 'Concierto Ejemplo',
@@ -204,15 +174,32 @@ export default {
       selectedSector: null,
       ticketQuantity: 1,
       generatedTicket: null,
-      showPaymentForm: false,
-      processingPayment: false,
-      paymentData: {
-        cardName: '',
-        cardNumber: '',
-        expiry: '',
-        cvv: '',
-        email: ''
+    }
+  },
+  watch: {
+    showPaymentForm(newVal) {
+      if (newVal) {
+        // Asegurar que el DOM esté listo antes de montar
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.mountStripeElements()
+          }, 100) // Pequeño delay para asegurar renderizado
+        })
+      } else {
+        // Limpiar elementos cuando se cierra el modal
+        this.unmountStripeElements()
       }
+    }
+  },
+  async mounted() {
+    try {
+      this.stripe = await loadStripe('pk_test_51RVixgFdzS9BTYBIRu2ywCDJIbG07BZMla226F7d3eV73ObFNBjTLemnPEV91Ed6JsbQ48FovcV4R5s0zciVgGXr00KGbVmZlj')
+      if (this.stripe) {
+        this.elements = this.stripe.elements()
+        console.log('Stripe inicializado correctamente')
+      }
+    } catch (error) {
+      console.error('Error inicializando Stripe:', error)
     }
   },
   computed: {
@@ -228,61 +215,237 @@ export default {
     }
   },
   methods: {
+    async mountStripeElements() {
+      try {
+        console.log('Intentando montar elementos de Stripe...')
+
+        // Verificar que Stripe esté inicializado
+        if (!this.stripe || !this.elements) {
+          console.error('Stripe no está inicializado')
+          return
+        }
+
+        // Verificar que los elementos del DOM existan
+        const cardNumberElement = document.getElementById('card-number-element')
+        const cardExpiryElement = document.getElementById('card-expiry-element')
+        const cardCvcElement = document.getElementById('card-cvc-element')
+
+        if (!cardNumberElement || !cardExpiryElement || !cardCvcElement) {
+          console.error('Elementos del DOM no encontrados')
+          console.log('card-number-element:', cardNumberElement)
+          console.log('card-expiry-element:', cardExpiryElement)
+          console.log('card-cvc-element:', cardCvcElement)
+          return
+        }
+
+        this.unmountStripeElements()
+
+        const style = {
+          base: {
+            fontSize: '16px',
+            color: '#32325d',
+            fontFamily: 'Arial, sans-serif',
+            padding: '12px',
+            '::placeholder': {
+              color: '#a0aec0'
+            }
+          },
+          invalid: {
+            color: '#e3342f'
+          }
+        }
+
+        this.cardNumber = this.elements.create('cardNumber', {
+          style,
+          showIcon: true
+        })
+        this.cardExpiry = this.elements.create('cardExpiry', { style })
+        this.cardCvc = this.elements.create('cardCvc', { style })
+
+        this.cardNumber.mount('#card-number-element')
+        this.cardExpiry.mount('#card-expiry-element')
+        this.cardCvc.mount('#card-cvc-element')
+
+        this.cardNumber.on('change', this.handleStripeChange)
+        this.cardExpiry.on('change', this.handleStripeChange)
+        this.cardCvc.on('change', this.handleStripeChange)
+
+        console.log('Elementos de Stripe montados correctamente')
+
+      } catch (error) {
+        console.error('Error montando elementos de Stripe:', error)
+      }
+    },
+    unmountStripeElements() {
+      try {
+        if (this.cardNumber) {
+          this.cardNumber.unmount()
+          this.cardNumber = null
+        }
+        if (this.cardExpiry) {
+          this.cardExpiry.unmount()
+          this.cardExpiry = null
+        }
+        if (this.cardCvc) {
+          this.cardCvc.unmount()
+          this.cardCvc = null
+        }
+        console.log('Elementos de Stripe desmontados')
+      } catch (error) {
+        console.error('Error desmontando elementos:', error)
+      }
+    },
+    handleStripeChange(event) {
+      if (event.error) {
+        console.error('Error en elemento Stripe:', event.error.message)
+      }
+    },
+    async handlePay() {
+      this.processingPayment = true
+
+      try {
+        const { paymentMethod, error } = await this.stripe.createPaymentMethod({
+          type: 'card',
+          card: this.cardNumber,
+          billing_details: {
+            name: this.billingName || 'Cliente',
+            email: this.billingEmail || null,
+          }
+        })
+
+        if (error) {
+          console.error('Error de Stripe:', error)
+          this.showErrorMessage('Error en los datos de la tarjeta: ' + error.message)
+          return
+        }
+
+        console.log('PaymentMethod creado:', paymentMethod.id)
+
+        const paymentData = {
+          paymentMethodId: paymentMethod.id,
+          monto: (this.sectores[this.selectedSector].precio * this.ticketQuantity).toFixed(2),
+          identrada: 1
+        }
+
+        console.log('Enviando datos al backend:', paymentData)
+
+        const response = await this.sendPaymentToBackend(paymentData)
+
+        if (response.success) {
+          this.showSuccessMessage('¡Pago procesado exitosamente!')
+          this.generatedTicket = response.pago
+          this.showPaymentForm = false
+
+          this.resetPaymentForm()
+        } else {
+          this.showErrorMessage('Error al procesar el pago: ' + response.message)
+        }
+
+      } catch (err) {
+        console.error('Error inesperado:', err)
+        this.showErrorMessage('Error inesperado: ' + err.message)
+      } finally {
+        this.processingPayment = false
+      }
+    },
+    async sendPaymentToBackend(paymentData) {
+      try {
+        const response = await fetch('http://localhost:3001/api/pagos/pagar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(paymentData)
+        });
+
+        const contentType = response.headers.get('content-type');
+
+        if (!response.ok) {
+          let errorMessage = `HTTP error! status: ${response.status}`;
+
+          if (contentType && contentType.includes('application/json')) {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } else {
+            const errorText = await response.text();
+            errorMessage = errorText || errorMessage;
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        const result = await response.json();
+        console.log('Respuesta del backend:', result);
+        return result;
+
+      } catch (error) {
+        console.error('Error enviando al backend:', error);
+        throw error;
+      }
+    },
+    resetPaymentForm() {
+      this.selectedSector = null
+      this.ticketQuantity = 1
+      this.billingName = ''
+      this.billingEmail = ''
+
+      if (this.cardNumber) {
+        this.cardNumber.clear()
+      }
+      if (this.cardExpiry) {
+        this.cardExpiry.clear()
+      }
+      if (this.cardCvc) {
+        this.cardCvc.clear()
+      }
+    },
+    showSuccessMessage(message) {
+      alert(message)
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: message,
+        confirmButtonColor: '#4caf50'
+      })
+    },
+
+    showErrorMessage(message) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: message,
+        confirmButtonColor: '#f44336'
+      })
+    },
+    validatePaymentForm() {
+      if (!this.selectedSector) {
+        this.showErrorMessage('Por favor selecciona un sector')
+        return false
+      }
+
+      if (this.ticketQuantity < 1) {
+        this.showErrorMessage('La cantidad debe ser mayor a 0')
+        return false
+      }
+
+      if (!this.billingName.trim()) {
+        this.showErrorMessage('Por favor ingresa el nombre del titular')
+        return false
+      }
+
+      return true
+    },
+    async handlePayWithValidation() {
+      if (!this.validatePaymentForm()) {
+        return
+      }
+
+      await this.handlePay()
+    },
     selectSector(sectorName) {
       this.selectedSector = sectorName;
       this.ticketQuantity = 1;
       this.generatedTicket = null;
-    },
-    formatCardNumber() {
-      // Eliminar todos los espacios existentes
-      let value = this.paymentData.cardNumber.replace(/\s/g, '');
-      
-      // Añadir espacio cada 4 dígitos
-      value = value.replace(/(\d{4})/g, '$1 ').trim();
-      
-      // Limitar a 16-19 dígitos dependiendo del tipo de tarjeta
-      if (this.cardType === 'amex') {
-        value = value.substring(0, 17); // 15 dígitos + 2 espacios
-      } else {
-        value = value.substring(0, 19); // 16 dígitos + 3 espacios
-      }
-      
-      this.paymentData.cardNumber = value;
-    },
-    formatExpiry() {
-      let value = this.paymentData.expiry.replace(/\D/g, '');
-      
-      if (value.length > 2) {
-        value = value.substring(0, 2) + '/' + value.substring(2, 4);
-      }
-      
-      this.paymentData.expiry = value.substring(0, 5);
-    },
-    async processPayment() {
-      this.processingPayment = true;
-      
-      try {
-        // Simular procesamiento de pago (en producción usarías una API como Stripe)
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Generar el ticket después del pago exitoso
-        this.generateTicket();
-        
-        // Cerrar el modal de pago
-        this.showPaymentForm = false;
-        
-        // Mostrar mensaje de éxito
-        alert('Pago procesado exitosamente. Tu ticket ha sido generado.');
-        
-        // Aquí iría la lógica para guardar la transacción en tu backend
-        // await this.saveTransaction();
-        
-      } catch (error) {
-        console.error('Error procesando el pago:', error);
-        alert('Hubo un error procesando tu pago. Por favor intenta nuevamente.');
-      } finally {
-        this.processingPayment = false;
-      }
     },
     generateTicket() {
       if (!this.selectedSector || this.ticketQuantity < 1) return;
@@ -353,6 +516,70 @@ export default {
 </script>
 
 <style scoped>
+#card-element {
+  background-color: white;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 16px;
+}
+
+.payment-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #2d3748;
+}
+
+label {
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 12px;
+  display: block;
+  color: #4a5568;
+}
+
+.stripe-element {
+  border: 1px solid #cbd5e0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background-color: #f7fafc;
+  margin-top: 5px;
+  margin-bottom: 16px;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+}
+
+.column {
+  flex: 1;
+}
+
+.pay-button {
+  background-color: #4CAF50;
+  color: white;
+  font-size: 16px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease;
+  margin-top: 16px;
+}
+
+.pay-button:hover {
+  background-color: #45a049;
+}
+
+.pay-button:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
 .ticket-purchase {
   max-width: 1200px;
   margin: 0 auto;
@@ -371,7 +598,7 @@ export default {
   padding: 1.5rem;
   background: #f9f9f9;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .sectors-grid {
@@ -391,12 +618,12 @@ export default {
 
 .sector-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .sector-card.selected {
   transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   border-width: 4px;
 }
 
@@ -449,7 +676,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -694,7 +921,7 @@ export default {
   box-shadow: inset 0 0 0 2px #3949ab;
 }
 
-.ticket-seat > h3 {
+.ticket-seat>h3 {
   grid-area: head;
   height: 100%;
   writing-mode: vertical-rl;
@@ -709,7 +936,7 @@ export default {
   border-bottom: 2px solid #3949ab;
 }
 
-.ticket-seat > h3 span {
+.ticket-seat>h3 span {
   position: absolute;
   bottom: 0;
   right: calc(50% + 1px);
@@ -721,36 +948,36 @@ export default {
   transform: translateX(50%);
 }
 
-.ticket-seat > .ticket-seat-box:nth-of-type(1) {
+.ticket-seat>.ticket-seat-box:nth-of-type(1) {
   grid-area: suba;
 }
 
-.ticket-seat > .ticket-seat-box:nth-of-type(2) {
+.ticket-seat>.ticket-seat-box:nth-of-type(2) {
   grid-area: subb;
 }
 
-.ticket-seat > .ticket-seat-box:nth-of-type(3) {
+.ticket-seat>.ticket-seat-box:nth-of-type(3) {
   grid-area: subc;
 }
 
-.ticket-seat > .ticket-seat-box {
+.ticket-seat>.ticket-seat-box {
   writing-mode: vertical-rl;
   text-orientation: sideways;
   text-align: center;
 }
 
-.ticket-seat > .ticket-seat-box:not(:last-child) {
+.ticket-seat>.ticket-seat-box:not(:last-child) {
   border-bottom: 2px solid #3949ab;
 }
 
-.ticket-seat > .ticket-seat-box p {
+.ticket-seat>.ticket-seat-box p {
   font-weight: bold;
   text-transform: uppercase;
   font-size: 14px;
   padding-right: 4px;
 }
 
-.ticket-seat > .ticket-seat-box h4 {
+.ticket-seat>.ticket-seat-box h4 {
   font-weight: 1000;
   font-size: 32px;
   line-height: 32px;
@@ -769,7 +996,7 @@ export default {
   box-shadow: inset 0 0 0 2px #3949ab;
 }
 
-.ticket-info > div:not(:nth-last-child(-n + 2)) {
+.ticket-info>div:not(:nth-last-child(-n + 2)) {
   border-bottom: 2px dashed #3949ab;
 }
 
@@ -832,15 +1059,15 @@ export default {
   .sectors-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .ticket {
     grid-template-columns: 80px calc(100% - 80px);
   }
-  
+
   .ticket-main {
     grid-template-columns: 30% 70%;
   }
-  
+
   .payment-container {
     width: 90%;
     padding: 1.5rem;
